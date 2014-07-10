@@ -26,6 +26,11 @@ class Chef
     
     class << self
 
+      def log(msg)
+        puts msg
+        Chef::Log.info(msg)
+      end
+
       # Loads the nexus encrypted data bag item. Attempts to load a data bag item
       # named after the current Chef environment. If one is not found, an item named
       # "_wildcard" will be used.
@@ -197,9 +202,13 @@ class Chef
         end
 
         def encrypted_data_bag_for(node, data_bag)
+          log "starting databag #{@encrypted_data_bags}"
           @encrypted_data_bags = {} unless @encrypted_data_bags
+          log "ecdatabag #{@encrypted_data_bags}"
 
           if @encrypted_data_bags[data_bag].nil?
+            log "nil #{@encrypted_data_bags[data_bag]}"
+            log "node.chef_environment #{node.chef_environment}"
             data_bag_item = encrypted_data_bag_item(node, data_bag, node.chef_environment)
             data_bag_item ||= encrypted_data_bag_item(node, data_bag, WILDCARD_DATABAG_ITEM)
             @encrypted_data_bags[data_bag] = data_bag_item
@@ -212,6 +221,7 @@ class Chef
         end
 
         def encrypted_data_bag_item(node, data_bag, data_bag_item)
+          log "db:#{data_bag}, dbi:#{data_bag_item}"
           if node[:nexus][:use_chef_vault]
             item = ChefVault::Item.load(data_bag, data_bag_item)
           else
